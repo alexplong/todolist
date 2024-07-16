@@ -1,11 +1,9 @@
-require "sinatra"
-require "sinatra/reloader"
-require "tilt/erubis"
+# frozen_string_literal: true
 
-# reroute to /lists
-# /lists/new routes to Form to save or cancel a new list
-# /lists/:number routes to List with button to all lists, complete all, edit list, and Form to add to_do item
-  # to_do item has a checkbox and a delete button 
+require 'sinatra'
+require 'sinatra/reloader'
+require 'sinatra/content_for'
+require 'tilt/erubis'
 
 configure do
   enable :sessions
@@ -16,31 +14,31 @@ before do
   session[:lists] ||= []
 end
 
-get "/" do
-  redirect "/lists"
+get '/' do
+  redirect '/lists'
 end
 
 # View list of lists
-get "/lists" do
+get '/lists' do
   @lists = session[:lists]
   erb :lists, layout: :layout
 end
 
 # Render new list form
-get "/lists/new" do
+get '/lists/new' do
   erb :new_list, layout: :layout
 end
 
 # Return an error message if the name is invalid. Return nil if name is valid.
 def error_for_list_name(name)
-  return "List name must be between 1 and 100 characters." if !(1..100).cover? name.size
-  return "List name must be unique." if session[:lists].any? { |list| list[:name] == name }
+  return 'List name must be between 1 and 100 characters.' unless (1..100).cover? name.size
+  return 'List name must be unique.' if session[:lists].any? { |list| list[:name] == name }
 
   nil
 end
 
 # Create a new list
-post "/lists" do
+post '/lists' do
   list_name = params[:list_name].strip
   error = error_for_list_name(list_name)
 
@@ -49,7 +47,15 @@ post "/lists" do
     erb :new_list, layout: :layout
   else
     session[:lists] << { name: list_name, todos: [] }
-    session[:success] = "The list has been created."
-    redirect "/lists" 
+    session[:success] = 'The list has been created.'
+    redirect '/lists'
   end
+end
+
+# Render a list
+get '/lists/:id' do
+  id = params[:list].to_i
+  @list = session[:lists][id]
+
+  erb :list, layout: :layout
 end
