@@ -84,5 +84,14 @@ post '/lists/:id' do
     redirect "/lists/#{id}"
   end
 end
+
+# Delete an existing todo list
+post '/lists/:id/destroy' do
+  id = params[:id].to_i
+  session[:lists].delete_at(id)
+  session[:success] = 'The list has been deleted.'
+  redirect '/lists'
+end
+
   erb :list, layout: :layout
 end
